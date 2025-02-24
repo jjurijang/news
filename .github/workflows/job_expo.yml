@@ -3,8 +3,8 @@ name: Scrape Job Expo
 on:
   # 매일 아침 9시에 자동 실행
   schedule:
-    - cron: '0 9 * * *'
-  # 혹은 "Run workflow" 버튼(수동) 클릭으로 실행
+    - cron: '*/1 * * * *'
+  # 수동 실행도 가능
   workflow_dispatch:
 
 jobs:
@@ -12,25 +12,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) 깃허브 리포지토리 체크아웃
-      - uses: actions/checkout@v2
-      
-      # 2) Python 버전 세팅 (예: 3.9)
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      
-      # 3) Selenium & Chrome 환경 준비
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           sudo apt-get update
           sudo apt-get install -y chromium-chromedriver xvfb
 
-      # 4) Xvfb(가상 디스플레이)를 구동해 GUI 없는 환경에서 Chrome 사용
       - name: Run Scrape Script
         run: |
           Xvfb :99 -ac -screen 0 1920x1080x16 &
           export DISPLAY=:99
           python main.py
+
+      - name: Upload CSV Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: job_expo_data
+          path: job_expo.csv
