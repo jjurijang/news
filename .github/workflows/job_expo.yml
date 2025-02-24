@@ -1,0 +1,54 @@
+name: Job Expo Scraper
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # 매일 0시에 실행 (UTC 기준)
+  workflow_dispatch:       # 수동 실행도 가능하게 설정
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg2
+          wget https://dl.google.com/linux/linux_signing_key.pub
+          sudo apt-key add linux_signing_key.pub
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install ChromeDriver
+        run: |
+          # 크롬 버전에 맞춰 크롬 드라이버 버전을 자동 설정
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          echo "Chrome version: $CHROME_VERSION"
+          wget https://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+
+      - name: Run Job Expo Scraper
+        run: |
+          python main.py
+          
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: job_expo_csv
+          path: job_expo.csv
