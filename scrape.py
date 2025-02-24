@@ -1,20 +1,18 @@
-# job_expo.py
-
-import time
-import pandas as pd
 from selenium import webdriver as wb
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-
+import time
+import requests
+import os
+import pandas as pd
 def scrape_job_expo(driver):
     # 데이터를 쌓아둘 리스트
     url="https://www.naver.com/"
     driver = wb.Chrome()
     driver.get(url)
-    # 반도체 설계 검색해서 관련 공고 찾기
+
     search = driver.find_element(By.ID, "query")
     search.send_keys("취업박람회 일정")
     search.send_keys(Keys.ENTER)
@@ -61,10 +59,12 @@ def scrape_job_expo(driver):
             print(f"크롤링 중단 (예외 발생): {e}")
             break
 
+    # 공백 문자열 제거
+
     # DataFrame 생성
     df = pd.DataFrame({
         "박람회": title_list2,
-        "기간": date_list2,
+        "기간": date_list2,  # 요청에 따라 하이퍼링크 등 다른 방식으로 저장 가능
         "장소": place_list2,
     })
 
