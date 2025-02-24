@@ -5,6 +5,9 @@ import pandas as pd
 from selenium import webdriver as wb
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 def scrape_job_expo(driver):
     # 데이터를 쌓아둘 리스트
