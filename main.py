@@ -1,12 +1,7 @@
 # main.py
-
-from selenium import webdriver as wb
-import pandas as pdfrom job_expo import scrape_job_expo
+from scrape import scrape_job_expo  # scrape.py 내 함수 임포트
 
 if __name__ == "__main__":
-    driver = wb.Chrome()
-    try:
-        df = scrape_job_expo(driver)
-        print(df.head())  # 크롤링한 결과 확인 로그
-    finally:
-        driver.quit()
+    # 함수에서 driver를 새로 정의하므로, 여기서는 따로 driver를 주입할 필요는 없습니다.
+    df = scrape_job_expo(None)
+    print(df)
