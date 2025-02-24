@@ -2,7 +2,7 @@ name: Job Expo Scraper
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # 매일 0시에 실행 (UTC 기준)
+    - cron: '*/1 * * * *'   # 매일 0시에 실행 (UTC 기준)
   workflow_dispatch:       # 수동 실행도 가능하게 설정
 
 jobs:
