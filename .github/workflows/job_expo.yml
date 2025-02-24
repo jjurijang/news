@@ -24,7 +24,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           sudo apt-get update
-          sudo apt-get install -y chromium-chromedriver xvfb
+          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb
 
       - name: Run Scrape Script
         run: |
