@@ -1,54 +1,36 @@
-name: Job Expo Scraper
+name: Scrape Job Expo
 
 on:
+  # 매일 아침 9시에 자동 실행
   schedule:
-    - cron: '*/1 * * * *'   # 매일 0시에 실행 (UTC 기준)
-  workflow_dispatch:       # 수동 실행도 가능하게 설정
+    - cron: '0 9 * * *'
+  # 혹은 "Run workflow" 버튼(수동) 클릭으로 실행
+  workflow_dispatch:
 
 jobs:
-  run-scraper:
+  build:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v3
+    steps:
+      # 1) 깃허브 리포지토리 체크아웃
+      - uses: actions/checkout@v2
+      
+      # 2) Python 버전 세팅 (예: 3.9)
+      - name: Setup Python
+        uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-
-      - name: Install Python dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
       
-      - name: Install Chrome
+      # 3) Selenium & Chrome 환경 준비
+      - name: Install dependencies
         run: |
+          pip install -r requirements.txt
           sudo apt-get update
-          sudo apt-get install -y wget gnupg2
-          wget https://dl.google.com/linux/linux_signing_key.pub
-          sudo apt-key add linux_signing_key.pub
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y chromium-chromedriver xvfb
 
-      - name: Install ChromeDriver
+      # 4) Xvfb(가상 디스플레이)를 구동해 GUI 없는 환경에서 Chrome 사용
+      - name: Run Scrape Script
         run: |
-          # 크롬 버전에 맞춰 크롬 드라이버 버전을 자동 설정
-          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
-          echo "Chrome version: $CHROME_VERSION"
-          wget https://chromedriver.storage.googleapis.com/$CHROME_VERSION/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          sudo chmod +x /usr/local/bin/chromedriver
-
-      - name: Run Job Expo Scraper
-        run: |
+          Xvfb :99 -ac -screen 0 1920x1080x16 &
+          export DISPLAY=:99
           python main.py
-          
-      - name: Upload CSV artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: job_expo_csv
-          path: job_expo.csv
